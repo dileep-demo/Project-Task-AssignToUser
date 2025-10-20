@@ -1,0 +1,51 @@
+﻿@model ProjectTaskAssign.ViewModels.ProjectDetailsViewModel
+@{
+    ViewData["Title"] = "Task List";
+}
+
+<h1 class="mb-4 text-center">@Model.ProjectName - Task List</h1>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info text-center">@ViewBag.Message</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered border-2">
+        <thead class="table-light">
+            <tr>
+                <th>Task Name</th>
+                <th>Status</th>
+                <th>Completion Date</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Tasks != null && Model.Tasks.Any())
+            {
+                @foreach (var task in Model.Tasks)
+                {
+                    <tr>
+                        <td>@task.Name</td>
+                        <td>@task.Status</td>
+                        <td>@task.CompletionDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-center">
+                            <a asp-action="UpdateTask" asp-route-id="@task.TaskId" class="btn btn-sm btn-primary me-1">Edit</a>
+                            <a asp-action="DeleteTask" asp-route-id="@task.TaskId" asp-route-projectId="@Model.ProjectId" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">No tasks available.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4 text-center">
+    <a asp-action="CreateTask" asp-route-projectId="@Model.ProjectId" class="btn btn-success">Add New Task</a>
+</div>

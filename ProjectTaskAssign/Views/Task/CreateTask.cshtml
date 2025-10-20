@@ -1,0 +1,62 @@
+﻿@model ProjectTaskAssign.ViewModels.TaskViewModel
+@{
+    ViewData["Title"] = "Add / Edit Task";
+    var projects = ViewBag.Projects as IEnumerable<dynamic>;
+}
+
+<h1 class="mb-4">Add / Edit Task</h1>
+
+<form asp-action="CreateTask" method="post" class="needs-validation" novalidate>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6">
+            <label asp-for="Name" class="form-label">Task Name</label>
+            <input asp-for="Name" class="form-control" placeholder="Enter task name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6">
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" class="form-select">
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Complete">Complete</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6">
+            <label asp-for="CompletionDate" class="form-label">Completion Date</label>
+            <input asp-for="CompletionDate" type="date" class="form-control" />
+            <span asp-validation-for="CompletionDate" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6">
+            <label asp-for="ProjectId" class="form-label">Select Project</label>
+            <select asp-for="ProjectId" class="form-select">
+                <option value="">Select Project</option>
+                @if (projects != null)
+                {
+                    foreach (var project in projects)
+                    {
+                        <option value="@project.Id">@project.Name</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="ProjectId" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-6 d-flex justify-content-start">
+            <button type="submit" class="btn btn-primary me-2">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+}
