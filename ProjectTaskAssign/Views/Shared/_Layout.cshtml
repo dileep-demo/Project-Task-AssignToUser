@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -20,10 +20,19 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="Index">Projects</a>
+                            <a class="nav-link text-dark h5 px-3" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index">Tasks</a>
+                            <a class="nav-link text-dark fw-bold h5 px-3" asp-area="" asp-controller="Project" asp-action="Index">Projects</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark h5 px-3" asp-area="" asp-controller="Task" asp-action="Index">Tasks</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark h5 px-3" asp-area="" asp-controller="Report" asp-action="ProjectPerformance">Reports</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark h5 px-3" asp-area="" asp-controller="Assignees" asp-action="Index">Assignees</a>
                         </li>
                     </ul>
                 </div>
