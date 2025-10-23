@@ -1,7 +1,7 @@
-﻿@model ProjectTaskAssign.ViewModels.TaskViewModel
+@model ProjectTaskAssign.ViewModels.TaskViewModel
+
 @{
     ViewData["Title"] = "Add / Edit Task";
-    var projects = ViewBag.Projects as IEnumerable<dynamic>;
 }
 
 <h1 class="mb-4">Add / Edit Task</h1>
@@ -27,25 +27,27 @@
     </div>
     <div class="row mb-3">
         <div class="col-12 col-md-6">
-            <label asp-for="CompletionDate" class="form-label">Completion Date</label>
-            <input asp-for="CompletionDate" type="date" class="form-control" />
-            <span asp-validation-for="CompletionDate" class="text-danger"></span>
+            <label asp-for="AssigneeId" class="form-label">Select Assignee</label>
+            <select asp-for="AssigneeId" class="form-select" asp-items="ViewBag.Assignees">
+                <option value="">Select Assignee</option>
+            </select>
+            <span asp-validation-for="AssigneeId" class="text-danger"></span>
         </div>
     </div>
     <div class="row mb-3">
         <div class="col-12 col-md-6">
             <label asp-for="ProjectId" class="form-label">Select Project</label>
-            <select asp-for="ProjectId" class="form-select">
+            <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.Projects">
                 <option value="">Select Project</option>
-                @if (projects != null)
-                {
-                    foreach (var project in projects)
-                    {
-                        <option value="@project.Id">@project.Name</option>
-                    }
-                }
             </select>
             <span asp-validation-for="ProjectId" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6">
+            <label asp-for="CompletionDate" class="form-label">Completion Date</label>
+            <input asp-for="CompletionDate" type="date" class="form-control" />
+            <span asp-validation-for="CompletionDate" class="text-danger"></span>
         </div>
     </div>
     <div class="row mt-4">
@@ -56,7 +58,8 @@
     </div>
 </form>
 
-@section Scripts {
+@section Scripts
+{
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
 }
