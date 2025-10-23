@@ -1,0 +1,42 @@
+@model IEnumerable<ProjectTaskAssign.ViewModels.AssigneeViewModel>
+
+@{
+    ViewData["Title"] = "Assignees";
+}
+
+<h1 class="mb-4">Assignees</h1>
+
+<div class="text-end mb-3">
+    <a asp-action="Add" class="btn btn-success">Add New Assignee</a>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>User Name</th>
+                <th>Email</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var assignee in Model)
+            {
+                <tr>
+                    <td>@assignee.FullName</td>
+                    <td>@assignee.Email</td>
+                    <td class="text-center">
+                        <a asp-action="Edit" asp-route-id="@assignee.AssigneeId" class="btn btn-primary btn-sm">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info text-center">
+        No records are found.
+    </div>
+}
