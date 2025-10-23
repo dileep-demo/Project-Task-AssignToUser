@@ -1,0 +1,39 @@
+@model IEnumerable<ProjectTaskAssign.ViewModels.ProjectPerformanceViewModel>
+@{
+    ViewData["Title"] = "Project Performance Report";
+}
+
+<h1 class="mb-4">Project Performance Report</h1>
+
+<div class="table-responsive">
+    <table class="table table-bordered border-2">
+        <thead class="table-light">
+            <tr>
+                <th>Project Name</th>
+                <th>Total Tasks</th>
+                <th>Completed Tasks</th>
+                <th>Completion Rate (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var report in Model)
+                {
+                    <tr>
+                        <td>@report.ProjectName</td>
+                        <td>@report.TotalTasks</td>
+                        <td>@report.CompletedTasks</td>
+                        <td>@report.CompletionRate%</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">No data available.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
