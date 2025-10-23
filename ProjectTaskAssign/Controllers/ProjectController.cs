@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectTaskAssign.Data;
@@ -92,21 +92,23 @@ namespace ProjectTaskAssign.Controllers
                 return View(projectViewModel);
             }
 
-            var existingProject = context.Project.Find(id);
+            // Retrieve the existing project
+            var existingProject = context.Project.AsNoTracking().FirstOrDefault(p => p.Id == id);
+
             if (existingProject == null)
             {
                 return NotFound();
             }
 
             
-            mapper.Map(projectViewModel, existingProject);
+            var updatedProject = mapper.Map<ProjectModel>(projectViewModel);
+            updatedProject.Id = id; // Id is not changed
 
-            context.Update(existingProject);
-            context.SaveChanges();
+            context.Entry(updatedProject).State = EntityState.Modified;
+             context.SaveChanges();
 
             return RedirectToAction("Index");
         }
-      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteProject(int id)
@@ -114,15 +116,15 @@ namespace ProjectTaskAssign.Controllers
             var project = context.Project.Find(id);
             if (project == null)
             {
-                return NotFound();
+                return NotFound(); 
             }
 
             context.Project.Remove(project);
             context.SaveChanges();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index"); 
         }
-
+        
         [HttpGet]
         public IActionResult ViewDetails(int projectId)
         {
