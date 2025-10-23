@@ -1,4 +1,4 @@
-﻿@model ProjectTaskAssign.ViewModels.ProjectDetailsViewModel
+@model ProjectTaskAssign.ViewModels.ProjectDetailsViewModel
 @{
     ViewData["Title"] = "Task List";
 }
@@ -47,5 +47,5 @@
 </div>
 
 <div class="mt-4 text-center">
-    <a asp-action="CreateTask" asp-route-projectId="@Model.ProjectId" class="btn btn-success">Add New Task</a>
+    @* <a asp-action="CreateTask" asp-route-projectId="@Model.ProjectId" class="btn btn-success">Add New Task</a> *@
 </div>
