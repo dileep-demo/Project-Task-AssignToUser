@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjectTaskAssign.Data;
 using ProjectTaskAssign.Models;
@@ -18,11 +19,11 @@ namespace ProjectTaskAssign.Controllers
             this.mapper = mapper;
         }
 
-
         public IActionResult Index()
         {
             var tasks = context.Tasks
                 .Include(t => t.ProjectModel) 
+                .Include(t => t.Assignee)
                 .ToList();
 
             if (!tasks.Any())
@@ -36,50 +37,30 @@ namespace ProjectTaskAssign.Controllers
                 TaskId = task.Id,
                 Name = task.Name,
                 ProjectName = task.ProjectModel?.Name, 
+                FullName = task.Assignee.FullName,
                 Status = task.status,
                 CompletionDate = task.CompletionDate
             }).ToList();
 
             return View(taskViewModels);
         }
-
-
-        //public IActionResult Index(int projectId)
-        //{
-        //    var tasks = context.Tasks
-        //        .Include(t => t.ProjectModel)
-        //        .Where(t => t.ProjectId == projectId)
-        //        .ToList();
-
-        //    if (!tasks.Any())
-        //    {
-        //        ViewBag.Message = "No tasks available.";
-        //        return View(new List<TaskViewModel>());
-        //    }
-
-        //    var taskViewModels = tasks.Select(task => new TaskViewModel
-        //    {
-        //        TaskId = task.Id,
-        //        Name = task.Name,
-        //        ProjectName = task.ProjectModel.Name,
-        //        Status = task.status,
-        //        CompletionDate = task.CompletionDate
-        //    }).ToList();
-
-        //    return View(taskViewModels);
-        //}
-
         [HttpGet]
         public IActionResult CreateTask(int projectId)
         {
-            // Populate the ViewBag with the list of projects
-            ViewBag.Projects = context.Project
-                .Select(p => new { p.Id, p.Name })
+            ViewBag.Projects = new SelectList(context.Project, "Id", "Name", projectId);
+
+            // Convert to SelectListItem
+            ViewBag.Assignees = context.Assignees
+                .Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.FullName
+                })
                 .ToList();
 
             var taskViewModel = new TaskViewModel
             {
-                ProjectId = projectId
+                ProjectId = projectId // Pre-select the project if projectId is provided
             };
             return View(taskViewModel);
         }
@@ -88,11 +69,21 @@ namespace ProjectTaskAssign.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateTask(TaskViewModel taskViewModel)
         {
-            ViewBag.Projects = context.Project
-                .Select(p => new { p.Id, p.Name })
+            ViewBag.Projects = new SelectList(context.Project, "Id", "Name", taskViewModel.ProjectId);
+
+            // Convert to SelectListItem
+            ViewBag.Assignees = context.Assignees
+                .Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.FullName
+                })
                 .ToList();
 
-            if (ModelState.IsValid)
+            ModelState.Remove(nameof(taskViewModel.ProjectName));
+            ModelState.Remove(nameof(taskViewModel.FullName));
+
+            if (!ModelState.IsValid)
             {
                 ViewBag.Message = "Please correct the errors in the form.";
                 return View(taskViewModel);
@@ -104,10 +95,73 @@ namespace ProjectTaskAssign.Controllers
 
             return RedirectToAction("Index", new { projectId = taskViewModel.ProjectId });
         }
-        
         [HttpGet]
         public IActionResult UpdateTask(int id)
         {
+            var existingTask = context.Tasks
+                .Include(t => t.ProjectModel)
+                .Include(t => t.Assignee)
+                .FirstOrDefault(t => t.Id == id);
+
+            if (existingTask == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.StatusList = new SelectList(new[]
+            {
+        new { Value = "Pending", Text = "Pending" },
+        new { Value = "In Progress", Text = "In Progress" },
+        new { Value = "Complete", Text = "Complete" }
+    }, "Value", "Text", existingTask.status);
+
+            ViewBag.Projects = new SelectList(context.Project, "Id", "Name", existingTask.ProjectId);
+
+            // Populate the dropdown for usernames
+            ViewBag.Assignees = context.Assignees
+                .Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.FullName
+                })
+                .ToList();
+
+            var taskViewModel = mapper.Map<TaskViewModel>(existingTask);
+            return View(taskViewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateTask(int id, TaskViewModel taskViewModel)
+        {
+            ModelState.Remove(nameof(taskViewModel.ProjectName));
+            ModelState.Remove(nameof(taskViewModel.FullName));
+
+            ViewBag.StatusList = new SelectList(new[]
+            {
+        new { Value = "Pending", Text = "Pending" },
+        new { Value = "In Progress", Text = "In Progress" },
+        new { Value = "Complete", Text = "Complete" }
+    }, "Value", "Text", taskViewModel.Status);
+
+            ViewBag.Projects = new SelectList(context.Project, "Id", "Name", taskViewModel.ProjectId);
+
+            // Populate the dropdown for usernames
+            ViewBag.Assignees = context.Assignees
+                .Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.FullName
+                })
+                .ToList();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Message = "Please correct the errors in the form.";
+                return View(taskViewModel);
+            }
+
             var existingTask = context.Tasks
                 .Include(t => t.ProjectModel)
                 .FirstOrDefault(t => t.Id == id);
@@ -117,33 +171,29 @@ namespace ProjectTaskAssign.Controllers
                 return NotFound();
             }
 
-            var taskViewModel = mapper.Map<TaskViewModel>(existingTask);
-            return View(taskViewModel);
-        }
+            existingTask.Name = taskViewModel.Name;
+            existingTask.status = taskViewModel.Status;
+            existingTask.CompletionDate = taskViewModel.CompletionDate;
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult UpdateTask(int id, TaskViewModel taskViewModel)
-        {
-            if (!ModelState.IsValid)
+            if (existingTask.ProjectId != taskViewModel.ProjectId)
             {
-                ViewBag.Message = "Please correct the errors in the form.";
-                return View(taskViewModel);
+                existingTask.ProjectId = taskViewModel.ProjectId;
+                existingTask.ProjectModel = null;
             }
 
-            var existingTask = context.Tasks.Find(id);
-            if (existingTask == null)
+            if (existingTask.AssigneeId != taskViewModel.AssigneeId)
             {
-                return NotFound();
+                existingTask.AssigneeId = taskViewModel.AssigneeId;
+                existingTask.Assignee = null;
             }
 
-            mapper.Map(taskViewModel, existingTask);
             context.Update(existingTask);
             context.SaveChanges();
 
             return RedirectToAction("Index", new { projectId = taskViewModel.ProjectId });
         }
-
+       
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteTask(int id, int projectId)
