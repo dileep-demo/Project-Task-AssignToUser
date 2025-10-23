@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjectTaskAssign.Models;
 
 namespace ProjectTaskAssign.Data
@@ -12,5 +12,7 @@ namespace ProjectTaskAssign.Data
 
         public DbSet<ProjectModel> Project { get; set; }
         public DbSet<TaskModel> Tasks { get; set; }
+
+        public DbSet<AssigneeModel> Assignees { get; set; }
     }
 }
